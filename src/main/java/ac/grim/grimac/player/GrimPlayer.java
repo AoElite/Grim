@@ -80,6 +80,7 @@ public class GrimPlayer implements GrimUser {
     public long lastTransSent = 0;
     public long lastTransReceived = 0;
     private long playerClockAtLeast = System.nanoTime();
+    public long timeJoinedInMs = System.currentTimeMillis();
     public double lastWasClimbing = 0;
     public boolean canSwimHop = false;
     public int riptideSpinAttackTicks = 0;
