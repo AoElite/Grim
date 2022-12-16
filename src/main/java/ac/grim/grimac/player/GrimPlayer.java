@@ -508,6 +508,10 @@ public class GrimPlayer implements GrimUser {
                 || getClientVersion().isOlderThan(ClientVersion.V_1_9);
     }
 
+    public boolean canThePlayerBeCloseToZeroMovement(int ticks) {
+        return (!uncertaintyHandler.lastPointThree.hasOccurredSince(ticks));
+    }
+
     public CompensatedInventory getInventory() {
         return checkManager.getPacketCheck(CompensatedInventory.class);
     }
@@ -596,7 +600,7 @@ public class GrimPlayer implements GrimUser {
         sendTransaction();
 
         compensatedEntities.serverPlayerVehicle = null;
-        event.getPostTasks().add(() -> {
+        event.getTasksAfterSend().add(() -> {
             if (compensatedEntities.getSelf().getRiding() != null) {
                 int ridingId = getRidingVehicleId();
                 TrackerData data = compensatedEntities.serverPositionsMap.get(ridingId);

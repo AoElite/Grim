@@ -80,11 +80,11 @@ public class PacketServerTeleport extends PacketListenerAbstract {
 
             player.sendTransaction();
             final int lastTransactionSent = player.lastTransactionSent.get();
-            event.getPostTasks().add(player::sendTransaction);
+            event.getTasksAfterSend().add(player::sendTransaction);
 
             if (teleport.isDismountVehicle()) {
                 // Remove player from vehicle
-                event.getPostTasks().add(() -> {
+                event.getTasksAfterSend().add(() -> {
                     player.compensatedEntities.getSelf().eject();
                 });
             }
@@ -107,7 +107,7 @@ public class PacketServerTeleport extends PacketListenerAbstract {
             int lastTransactionSent = player.lastTransactionSent.get();
             Vector3d finalPos = vehicleMove.getPosition();
 
-            event.getPostTasks().add(player::sendTransaction);
+            event.getTasksAfterSend().add(player::sendTransaction);
             player.vehicleData.vehicleTeleports.add(new Pair<>(lastTransactionSent, finalPos));
         }
     }

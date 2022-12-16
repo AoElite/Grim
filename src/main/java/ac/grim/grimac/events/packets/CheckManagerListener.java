@@ -152,6 +152,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             }
 
             if (player.gamemode != GameMode.CREATIVE) {
+                player.getInventory().markSlotAsResyncing(blockPlace);
                 if (hand == InteractionHand.MAIN_HAND) {
                     player.getInventory().inventory.setHeldItem(ItemStack.builder().type(ItemTypes.BUCKET).amount(1).build());
                 } else {
@@ -266,7 +267,9 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 BlockPlace blockPlace = new BlockPlace(player, place.getHand(), blockPosition, place.getFace(), placedWith, getNearestHitResult(player, null, true));
 
                 // Right-clicking a trapdoor/door/etc.
-                if (Materials.isClientSideInteractable(blockPlace.getPlacedAgainstMaterial())) {
+                StateType placedAgainst = blockPlace.getPlacedAgainstMaterial();
+                if ((player.getClientVersion().isOlderThan(ClientVersion.V_1_8) && (placedAgainst == StateTypes.IRON_TRAPDOOR || placedAgainst == StateTypes.IRON_DOOR))
+                        || Materials.isClientSideInteractable(placedAgainst)) {
                     Vector3i location = blockPlace.getPlacedAgainstBlockLocation();
                     player.compensatedWorld.tickOpenable(location.getX(), location.getY(), location.getZ());
                     return;
@@ -423,7 +426,9 @@ public class CheckManagerListener extends PacketListenerAbstract {
             if (dig.getAction() == DiggingAction.FINISHED_DIGGING) {
                 // Not unbreakable
                 if (block.getType().getHardness() != -1.0f) {
+                    player.compensatedWorld.startPredicting();
                     player.compensatedWorld.updateBlock(dig.getBlockPosition().getX(), dig.getBlockPosition().getY(), dig.getBlockPosition().getZ(), 0);
+                    player.compensatedWorld.stopPredicting(dig);
                 }
             }
 
@@ -488,14 +493,15 @@ public class CheckManagerListener extends PacketListenerAbstract {
                     player.onPacketCancel();
 
                     Vector3i facePos = new Vector3i(packet.getBlockPosition().getX() + packet.getFace().getModX(), packet.getBlockPosition().getY() + packet.getFace().getModY(), packet.getBlockPosition().getZ() + packet.getFace().getModZ());
-                    int placed = player.compensatedWorld.getWrappedBlockStateAt(packet.getBlockPosition()).getGlobalId();
-                    int face = player.compensatedWorld.getWrappedBlockStateAt(facePos).getGlobalId();
-                    player.user.sendPacket(new WrapperPlayServerBlockChange(blockPlace.getPlacedBlockPos(), placed));
-                    player.user.sendPacket(new WrapperPlayServerBlockChange(facePos, face));
 
                     // Ends the client prediction introduced in 1.19+
                     if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19) && PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19)) {
                         player.user.sendPacket(new WrapperPlayServerAcknowledgeBlockChanges(packet.getSequence()));
+                    } else { // The client isn't smart enough to revert changes
+                        int placed = player.compensatedWorld.getWrappedBlockStateAt(packet.getBlockPosition()).getGlobalId();
+                        int face = player.compensatedWorld.getWrappedBlockStateAt(facePos).getGlobalId();
+                        player.user.sendPacket(new WrapperPlayServerBlockChange(blockPlace.getPlacedBlockPos(), placed));
+                        player.user.sendPacket(new WrapperPlayServerBlockChange(facePos, face));
                     }
 
                     // Stop inventory desync from cancelling place
@@ -575,7 +581,10 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 blockPlace.set(StateTypes.AIR);
             }
 
-            setPlayerItem(player, hand, type);
+            if (player.gamemode != GameMode.CREATIVE) {
+                player.getInventory().markSlotAsResyncing(blockPlace);
+                setPlayerItem(player, hand, type);
+            }
         }
     }
 
@@ -707,6 +716,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 blockPlace.set(pos, StateTypes.LILY_PAD.createBlockState(CompensatedWorld.blockVersion));
 
                 if (player.gamemode != GameMode.CREATIVE) {
+                    player.getInventory().markSlotAsResyncing(blockPlace);
                     if (hand == InteractionHand.MAIN_HAND) {
                         player.getInventory().inventory.getHeldItem().setAmount(player.getInventory().inventory.getHeldItem().getAmount() - 1);
                     } else {

@@ -76,7 +76,7 @@ public class CompensatedWorld {
     private boolean isCurrentlyPredicting = false;
     public boolean isRaining = false;
 
-    private boolean noNegativeBlocks;
+    private final boolean noNegativeBlocks;
 
     public CompensatedWorld(GrimPlayer player) {
         this.player = player;
@@ -183,15 +183,13 @@ public class CompensatedWorld {
             }
 
             serverIsCurrentlyProcessingThesePredictions.put(confirmationId, toApplyBlocks);
-        } else if (!ViaBackwardsManager.didViaBreakBlockPredictions) {
-            // ViaVersion is updated and runs tasks with bukkit which is correct (or we are 1.19 server)
-            // So we must wait for the bukkit thread to start ticking so the server can confirm it
+        } else {
+            // ViaVersion is updated and runs tasks with bukkit which is correct
+            // So we must wait for the bukkit thread to start ticking so via can "confirm" it
             Bukkit.getScheduler().runTask(GrimAPI.INSTANCE.getPlugin(), () -> {
                 // And then we jump back to the netty thread to simulate that Via sent the confirmation
                 ChannelHelper.runInEventLoop(player.user.getChannel(), () -> applyBlockChanges(toApplyBlocks));
             });
-        } else { // ViaVersion is being stupid and sending acks immediately
-            applyBlockChanges(toApplyBlocks);
         }
     }
 
@@ -294,7 +292,7 @@ public class CompensatedWorld {
     public void tickOpenable(int blockX, int blockY, int blockZ) {
         WrappedBlockState data = player.compensatedWorld.getWrappedBlockStateAt(blockX, blockY, blockZ);
 
-        if (BlockTags.WOODEN_DOORS.contains(data.getType())) {
+        if (BlockTags.WOODEN_DOORS.contains(data.getType()) || (player.getClientVersion().isOlderThan(ClientVersion.V_1_8) && data.getType() == StateTypes.IRON_DOOR)) {
             WrappedBlockState otherDoor = player.compensatedWorld.getWrappedBlockStateAt(blockX,
                     blockY + (data.getHalf() == Half.LOWER ? 1 : -1), blockZ);
 
@@ -316,7 +314,8 @@ public class CompensatedWorld {
                     player.compensatedWorld.updateBlock(blockX, blockY - 1, blockZ, otherDoor.getGlobalId());
                 }
             }
-        } else if (BlockTags.WOODEN_TRAPDOORS.contains(data.getType()) || BlockTags.FENCE_GATES.contains(data.getType())) {
+        } else if (BlockTags.WOODEN_TRAPDOORS.contains(data.getType()) || BlockTags.FENCE_GATES.contains(data.getType())
+                || (player.getClientVersion().isOlderThan(ClientVersion.V_1_8) && data.getType() == StateTypes.IRON_TRAPDOOR)) {
             // Take 12 most significant bytes -> the material ID.  Combine them with the new block magic data.
             data.setOpen(!data.isOpen());
             player.compensatedWorld.updateBlock(blockX, blockY, blockZ, data.getGlobalId());

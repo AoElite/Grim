@@ -100,7 +100,7 @@ public class CheckManager {
                 .build();
 
         postPredictionCheck = new ImmutableClassToInstanceMap.Builder<PostPredictionCheck>()
-                //.put(NegativeTimerCheck.class, new NegativeTimerCheck(player))
+                .put(NegativeTimerCheck.class, new NegativeTimerCheck(player))
                 .put(ExplosionHandler.class, new ExplosionHandler(player))
                 .put(KnockbackHandler.class, new KnockbackHandler(player))
                 .put(GhostBlockDetector.class, new GhostBlockDetector(player))
@@ -110,7 +110,6 @@ public class CheckManager {
                 .put(SuperDebug.class, new SuperDebug(player))
                 .put(DebugHandler.class, new DebugHandler(player))
                 .put(EntityControl.class, new EntityControl(player))
-                .put(BadPacketsM.class, new BadPacketsM(player))
                 .put(NoSlow.class, new NoSlow(player))
                 .put(SetbackTeleportUtil.class, new SetbackTeleportUtil(player)) // Avoid teleporting to new position, update safe pos last
                 .put(CompensatedFireworks.class, player.compensatedFireworks)

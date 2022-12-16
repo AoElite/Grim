@@ -160,10 +160,13 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
 
             // Stop people from spamming the server with out of bounds exceptions
             if (slot.getSlot() > 8) return;
+            // Prevent issues if the player switches slots, while lagging, standing still, and is placing blocks
+            CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
 
             if (player.packetStateData.lastSlotSelected != slot.getSlot()) {
                 player.packetStateData.slowedByUsingItem = false;
                 // Sequence is ignored by the server
+                PacketEvents.getAPI().getProtocolManager().receivePacketSilently(player.user.getChannel(), new WrapperPlayClientHeldItemChange(slot.getSlot()));
                 PacketEvents.getAPI().getProtocolManager().receivePacketSilently(player.user.getChannel(), new WrapperPlayClientPlayerDigging(DiggingAction.RELEASE_USE_ITEM, new Vector3i(), BlockFace.DOWN, 0));
                 player.checkManager.getPostPredictionCheck(NoSlow.class).didSlotChangeLastTick = true;
             }
