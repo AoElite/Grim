@@ -47,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Everything in this class should be sync'd to the anticheat thread.
@@ -537,6 +538,10 @@ public class GrimPlayer implements GrimUser {
 
     public long getPlayerClockAtLeast() {
         return playerClockAtLeast;
+    }
+
+    public long getPlayerClockDelayInMs() {
+        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - getPlayerClockAtLeast());
     }
 
     public SetbackTeleportUtil getSetbackTeleportUtil() {

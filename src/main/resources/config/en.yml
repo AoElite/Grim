@@ -36,6 +36,16 @@ spectators:
 # How long should players have until we kick them for timing out? Default = 60 seconds
 max-transaction-time: 60
 
+ChatSpam:
+  # Enables this module
+  prevent-spam: false
+  # Maximum number of duplicate messages
+  max-duplicates: 5
+  # Minimum delay between messages
+  min-delay: 250
+  # Should the minimum delay be lag compensated
+  lag-compensate: false
+
 Simulation:
   # How much should we multiply total advantage by when the player is legit
   # This is what the default config looks like (x axis = seconds, y axis = 1/1000 block): https://www.desmos.com/calculator/d4ufgxrxer

@@ -1,6 +1,5 @@
 package ac.grim.grimac;
 
-import ac.grim.grimac.checks.Check;
 import ac.grim.grimac.manager.init.Initable;
 import ac.grim.grimac.player.GrimPlayer;
 import com.github.retrooper.packetevents.netty.channel.ChannelHelper;

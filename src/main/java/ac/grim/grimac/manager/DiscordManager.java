@@ -20,6 +20,9 @@ public class DiscordManager implements Initable {
     private int embedColor;
     private String staticContent = "";
 
+    private boolean includeUUID = false;
+    private boolean includeHead = false;
+
     public static final Pattern WEBHOOK_PATTERN = Pattern.compile("(?:https?://)?(?:\\w+\\.)?\\w+\\.\\w+/api(?:/v\\d+)?/webhooks/(\\d+)/([\\w-]+)(?:/(?:\\w+)?)?");
 
     @Override
@@ -39,6 +42,9 @@ public class DiscordManager implements Initable {
             }
             client = WebhookClient.withId(Long.parseUnsignedLong(matcher.group(1)), matcher.group(2));
             client.setTimeout(15000); // Requests expire after 15 seconds
+
+            includeHead = GrimAPI.INSTANCE.getConfigManager().getConfig().getBooleanElse("include-head", true);
+            includeUUID = GrimAPI.INSTANCE.getConfigManager().getConfig().getBooleanElse("include-uuid", false);
 
             try {
                 embedColor = Color.decode(GrimAPI.INSTANCE.getConfigManager().getConfig().getStringElse("embed-color", "#00FFFF")).getRGB();
@@ -76,14 +82,25 @@ public class DiscordManager implements Initable {
             content = GrimAPI.INSTANCE.getExternalAPI().replaceVariables(player, content, false);
             content = content.replace("_", "\\_");
 
-            WebhookEmbedBuilder embed = new WebhookEmbedBuilder()
-                    .setImageUrl("https://i.stack.imgur.com/Fzh0w.png") // Constant width
-                    .setThumbnailUrl("https://crafthead.net/helm/" + player.user.getProfile().getUUID())
-                    .setColor(embedColor)
+            WebhookEmbedBuilder embed = new WebhookEmbedBuilder();
+
+            embed.setImageUrl("https://i.stack.imgur.com/Fzh0w.png"); // Constant width
+
+            if (includeHead) {
+                embed.setThumbnailUrl("https://crafthead.net/helm/" + player.user.getProfile().getUUID());
+            }
+
+            embed.setColor(embedColor)
                     .setTitle(new WebhookEmbed.EmbedTitle("**Grim Alert**", null))
                     .setDescription(content)
-                    .setTimestamp(Instant.now())
-                    .setFooter(new WebhookEmbed.EmbedFooter("", "https://grim.ac/images/grim.png"));
+                    .setTimestamp(Instant.now());
+
+            if (includeUUID) {
+                embed.setFooter(new WebhookEmbed.EmbedFooter(player.user.getProfile().getUUID() + "", "https://grim.ac/images/grim.png"));
+            } else {
+                embed.setFooter(new WebhookEmbed.EmbedFooter(player.user.getProfile().getUUID() + "", "https://grim.ac/images/grim.png"));
+
+            }
 
             if (!verbose.isEmpty()) {
                 embed.addField(new WebhookEmbed.EmbedField(true, "Verbose", verbose));

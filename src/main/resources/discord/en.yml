@@ -1,5 +1,7 @@
 enabled: false
 webhook: ""
+include-head: true
+include-uuid: false
 embed-color: "#00FFFF"
 violation-content:
   - "**Player**: %player%"
