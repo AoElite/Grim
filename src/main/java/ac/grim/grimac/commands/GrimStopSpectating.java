@@ -5,6 +5,7 @@ import ac.grim.grimac.utils.anticheat.MessageUtil;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -13,7 +14,7 @@ import org.bukkit.entity.Player;
 public class GrimStopSpectating extends BaseCommand {
     @Subcommand("stopspectating")
     @CommandPermission("grim.spectate")
-    public void onStopSpectate(CommandSender sender, String string) {
+    public void onStopSpectate(CommandSender sender, @Optional String string) {
         if (!(sender instanceof Player)) return;
         Player player = (Player) sender;
         if (GrimAPI.INSTANCE.getSpectateManager().isSpectating(player.getUniqueId())) {

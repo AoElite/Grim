@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class ClientBrand extends Check implements PacketCheck {
     String brand = "vanilla";
-    boolean hasBrand = false;
+    public boolean hasBrand = false;
 
     public ClientBrand(GrimPlayer player) {
         super(player);
