@@ -23,18 +23,18 @@ public class ChatSpam extends Check implements PacketCheck {
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
         if (event.getPacketType() == PacketType.Play.Client.CHAT_MESSAGE && preventSpam) {
-            WrapperPlayClientChatMessage wrapper = new WrapperPlayClientChatMessage(event);
-            final String message = wrapper.getMessage();
+        /*    WrapperPlayClientChatMessage wrapper = new WrapperPlayClientChatMessage(event);
+            final String message = wrapper.getMessage();*/
             final long time = System.currentTimeMillis();
 
-            if (message.equalsIgnoreCase(lastMessage) && sameMessage++ > maxDuplicates) {
+         /*   if (message.equalsIgnoreCase(lastMessage) && sameMessage++ > maxDuplicates) {
                 event.setCancelled(true);
                 player.onPacketCancel();
                 flagAndAlert("duplicates=" + sameMessage);
             } else {
                 sameMessage = 0;
             }
-
+*/
             long delay = time - lastMessageTime;
             if (!event.isCancelled() && delay < (lagCompensate ? Math.max(minDelay, minDelay + player.getPlayerClockDelayInMs()) : minDelay)) {
                 event.setCancelled(true);
@@ -43,7 +43,7 @@ public class ChatSpam extends Check implements PacketCheck {
             }
             //
             lastMessageTime = time;
-            lastMessage = message;
+            //lastMessage = message;
         }
     }
 
