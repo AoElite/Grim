@@ -233,4 +233,10 @@ public class GrimMath {
     public static double square(double num) {
         return num * num;
     }
+
+    public static double round(double number, int place) {
+        double exp = Math.pow(10, place);
+        return Math.round(number * exp) / exp;
+    }
+
 }
